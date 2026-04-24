@@ -1,0 +1,57 @@
+# ============================================================
+# mis-finanzas — .gitignore
+# ============================================================
+
+# --- Dependencias ---
+node_modules
+.pnp
+.pnp.js
+
+# --- Variables de entorno (NUNCA subir) ---
+# Matchea .env en cualquier nivel: raíz, app/, supabase/, etc.
+.env
+.env.local
+.env.*.local
+*.env.backup
+
+# --- Otros archivos con secretos potenciales ---
+*.pem
+*.key
+*.cert
+secrets.json
+
+# --- Nuxt build artifacts ---
+app/.nuxt
+app/.output
+app/dist
+*.tsbuildinfo
+
+# --- Supabase CLI state (específico de tu máquina) ---
+supabase/.branches
+supabase/.temp
+supabase/.env
+supabase/functions/.env
+
+# --- Vercel local ---
+.vercel
+
+# --- Editor ---
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# --- Logs ---
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Misc ---
+.cache
+coverage
+.turbo
+.DS_Store

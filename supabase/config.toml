@@ -1,0 +1,59 @@
+project_id = "mis-finanzas"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 17
+
+[db.pooler]
+enabled = false
+
+[realtime]
+enabled = true
+
+[studio]
+enabled = true
+port = 54323
+api_url = "http://localhost"
+
+[inbucket]
+enabled = true
+port = 54324
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:3000/auth/callback"]
+jwt_expiry = 3600
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = false
+
+[edge_runtime]
+enabled = true
+policy = "oneshot"
+inspector_port = 8083
+
+# Webhooks externos: los llaman Telegram/Twilio que no mandan JWT.
+# La seguridad la maneja cada función por su cuenta:
+#   - tg-webhook valida el header X-Telegram-Bot-Api-Secret-Token
+#   - wa-webhook (TODO: validar firma HMAC de Twilio)
+[functions.tg-webhook]
+verify_jwt = false
+
+[functions.wa-webhook]
+verify_jwt = false
+
+# refresh-rates: la llamás vos manualmente o por cron; JWT opcional
+[functions.refresh-rates]
+verify_jwt = false
