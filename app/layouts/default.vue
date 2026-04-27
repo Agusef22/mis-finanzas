@@ -54,14 +54,24 @@ async function logout() {
   }
 }
 
-// Watcher de seguridad: si el user cambia (login con otro user en mismo browser),
-// limpiar todo el cache para evitar que se vea data del user anterior.
-watch(() => user.value?.id, (newId, oldId) => {
-  if (oldId && newId && oldId !== newId) {
-    console.warn('[security] User cambió, limpiando cache de queries')
+// Watcher de seguridad ANTI DATA-LEAK: limpia cache cuando cambia el user.id
+// Cubre 4 casos:
+//   1. user_a → null (logout)
+//   2. null → user_b (login después de logout)
+//   3. user_a → user_b (cambio directo, raro)
+//   4. user_a → user_a (no hace nada)
+// Sin este watcher, el cache de TanStack Query muestra data del user anterior.
+const lastSeenUserId = ref<string | null>(null)
+watch(() => user.value?.id, (currentId) => {
+  const last = lastSeenUserId.value
+  // Si ya había un user previo (last) y ahora es distinto (incluyendo null),
+  // limpiar TODO el cache para evitar leak.
+  if (last && last !== currentId) {
+    console.warn('[security] User changed, clearing query cache. Was:', last, 'Now:', currentId)
     queryClient.clear()
   }
-})
+  lastSeenUserId.value = currentId ?? null
+}, { immediate: true })
 
 const navLinks = [
   { to: '/', label: 'Inicio', icon: LayoutGrid },
