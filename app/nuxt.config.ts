@@ -60,6 +60,7 @@ export default defineNuxtConfig({
         { name: 'description', content: 'Gestión de finanzas personales' },
         { name: 'theme-color', content: '#ffffff', media: '(prefers-color-scheme: light)' },
         { name: 'theme-color', content: '#111111', media: '(prefers-color-scheme: dark)' },
+        { name: 'mobile-web-app-capable', content: 'yes' },
         { name: 'apple-mobile-web-app-capable', content: 'yes' },
         { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
       ],
