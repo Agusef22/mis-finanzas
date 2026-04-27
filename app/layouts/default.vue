@@ -12,15 +12,56 @@ import {
   Menu,
   X as XIcon,
 } from 'lucide-vue-next'
+import { useQueryClient } from '@tanstack/vue-query'
 
 const user = useSupabaseUser()
 const client = useSupabaseClient()
 const route = useRoute()
+const queryClient = useQueryClient()
 
 async function logout() {
-  await client.auth.signOut()
-  await navigateTo('/login')
+  try {
+    // 1. Cancelar queries en curso
+    await queryClient.cancelQueries()
+
+    // 2. Sign out con scope 'global' — invalida TODOS los refresh tokens del user
+    //    en cualquier device. Sin esto un atacante con refresh token podría seguir entrando.
+    await client.auth.signOut({ scope: 'global' })
+
+    // 3. Limpiar cache de queries
+    queryClient.clear()
+
+    // 4. Limpiar storage local de Supabase manualmente por si algún token quedó suelto
+    if (import.meta.client) {
+      const keysToRemove: string[] = []
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i)
+        if (k && (k.startsWith('sb-') || k.startsWith('supabase'))) {
+          keysToRemove.push(k)
+        }
+      }
+      keysToRemove.forEach(k => localStorage.removeItem(k))
+    }
+  } catch (e) {
+    console.error('Error en logout:', e)
+  }
+
+  // 5. Hard navigate (no SPA navigation) — fuerza recarga completa para limpiar state
+  if (import.meta.client) {
+    window.location.href = '/login'
+  } else {
+    await navigateTo('/login')
+  }
 }
+
+// Watcher de seguridad: si el user cambia (login con otro user en mismo browser),
+// limpiar todo el cache para evitar que se vea data del user anterior.
+watch(() => user.value?.id, (newId, oldId) => {
+  if (oldId && newId && oldId !== newId) {
+    console.warn('[security] User cambió, limpiando cache de queries')
+    queryClient.clear()
+  }
+})
 
 const navLinks = [
   { to: '/', label: 'Inicio', icon: LayoutGrid },
