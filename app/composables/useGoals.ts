@@ -99,6 +99,8 @@ export function useGoals() {
       const { current_amount_raw, ...rest } = row
       return {
         ...rest,
+        // Asegurar que existe `id` además de `goal_id` (la vista solo expone goal_id)
+        id: row.goal_id,
         current_amount: currentAmount,
         pct_complete: pct,
         conversion_failed: conversionFailed,

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import type { Budget } from '~/types/database'
 
 export interface BudgetWithStatus extends Budget {
+  budget_id: string
   period_start: string
   period_end: string
   spent: number
@@ -20,7 +21,12 @@ export function useBudgets() {
         .select('*')
         .order('created_at', { ascending: true })
       if (error) throw error
-      return data as BudgetWithStatus[]
+      // La vista usa budget_id; mapeamos también a `id` para que sea consistente
+      // con el resto del código y los update/delete funcionen.
+      return (data ?? []).map(row => ({
+        ...row,
+        id: row.budget_id,
+      })) as BudgetWithStatus[]
     },
   })
 }
@@ -52,6 +58,7 @@ export function useUpdateBudget() {
 
   return useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: Partial<Budget> }) => {
+      if (!id) throw new Error('budget id missing')
       const { data, error } = await supabase
         .from('budgets')
         .update(patch as any)
@@ -71,6 +78,7 @@ export function useDeleteBudget() {
 
   return useMutation({
     mutationFn: async (id: string) => {
+      if (!id) throw new Error('budget id missing')
       const { error } = await supabase.from('budgets').delete().eq('id', id)
       if (error) throw error
     },
