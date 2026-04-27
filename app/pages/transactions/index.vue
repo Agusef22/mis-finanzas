@@ -3,7 +3,7 @@ import { Plus, Search, X } from 'lucide-vue-next'
 import { useDebounceFn } from '@vueuse/core'
 import { useAccounts } from '~/composables/useAccounts'
 import { useCategories } from '~/composables/useCategories'
-import { useTransactions, useDeleteTransaction, type TransactionFilters } from '~/composables/useTransactions'
+import { useInfiniteTransactions, useDeleteTransaction, type TransactionFilters } from '~/composables/useTransactions'
 import { monthRange, shiftMonth } from '~/utils/month'
 
 type PresetPeriod = 'this-month' | 'last-month' | 'last-3' | 'last-6' | 'this-year' | 'all' | 'custom'
@@ -51,7 +51,6 @@ const dateRange = computed(() => {
 })
 
 const filters = computed<TransactionFilters>(() => ({
-  limit: 500,
   type: typeFilter.value || undefined,
   accountId: accountFilter.value || undefined,
   categoryId: categoryFilter.value || undefined,
@@ -62,8 +61,20 @@ const filters = computed<TransactionFilters>(() => ({
 
 const { data: accounts } = useAccounts()
 const { data: categories } = useCategories()
-const { data: transactions, isLoading } = useTransactions(filters)
+const {
+  data: txPages,
+  isLoading,
+  isFetchingNextPage,
+  hasNextPage,
+  fetchNextPage,
+} = useInfiniteTransactions(filters, 50)
 const delTx = useDeleteTransaction()
+
+// Aplanar páginas en un solo array
+const transactions = computed(() => {
+  const pages = txPages.value?.pages ?? []
+  return pages.flat()
+})
 
 function clearFilters() {
   period.value = 'this-month'
@@ -209,9 +220,25 @@ const periods: { v: PresetPeriod; l: string }[] = [
     </div>
 
     <TransactionList
-      :transactions="transactions || []"
+      :transactions="transactions"
       :loading="isLoading"
       @delete="(id) => delTx.mutate(id)"
     />
+
+    <!-- Cargar más / paginación infinita -->
+    <div v-if="!isLoading && transactions.length > 0" class="flex justify-center pt-2">
+      <button
+        v-if="hasNextPage"
+        type="button"
+        class="app-btn app-btn-secondary"
+        :disabled="isFetchingNextPage"
+        @click="fetchNextPage()"
+      >
+        {{ isFetchingNextPage ? 'Cargando…' : 'Cargar más' }}
+      </button>
+      <p v-else class="text-xs text-text-muted">
+        {{ transactions.length }} movimientos · no hay más
+      </p>
+    </div>
   </div>
 </template>

@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/vue-query'
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/vue-query'
 import { v4 as uuidv4 } from 'uuid'
 import type { Transaction } from '~/types/database'
 
@@ -55,6 +55,57 @@ export function useTransactions(filters: Ref<TransactionFilters> | TransactionFi
       const { data, error } = await q
       if (error) throw error
       return data as Transaction[]
+    },
+  })
+}
+
+/**
+ * Paginación infinita para listados largos.
+ * Usa range() de Supabase con paginación por offset (suficiente para uso personal).
+ * pageSize default: 50 → balance entre payload y UX.
+ */
+export function useInfiniteTransactions(
+  filters: Ref<TransactionFilters> | TransactionFilters = {},
+  pageSize = 50,
+) {
+  const supabase = useSupabaseClient()
+  const user = useSupabaseUser()
+  const filtersRef = isRef(filters) ? filters : ref(filters)
+
+  return useInfiniteQuery({
+    queryKey: ['transactions', 'infinite', computed(() => user.value?.id), filtersRef, pageSize],
+    enabled: computed(() => !!user.value),
+    initialPageParam: 0,
+    queryFn: async ({ pageParam }) => {
+      const f = filtersRef.value
+      const from = (pageParam as number) * pageSize
+      const to = from + pageSize - 1
+      let q = supabase
+        .from('transactions')
+        .select('*, account:accounts(*), category:categories(*)')
+        .is('deleted_at', null)
+        .order('occurred_at', { ascending: false })
+        .order('id', { ascending: false })
+        .range(from, to)
+
+      if (f.start) q = q.gte('occurred_at', f.start)
+      if (f.end) q = q.lt('occurred_at', f.end)
+      if (f.accountId) q = q.eq('account_id', f.accountId)
+      if (f.categoryId) q = q.eq('category_id', f.categoryId)
+      if (f.type) q = q.eq('type', f.type)
+      if (f.search && f.search.trim()) {
+        const s = `%${f.search.trim()}%`
+        q = q.or(`description.ilike.${s},notes.ilike.${s}`)
+      }
+
+      const { data, error } = await q
+      if (error) throw error
+      return (data ?? []) as Transaction[]
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      // Si la última página devolvió menos que pageSize, no hay más
+      if (!lastPage || lastPage.length < pageSize) return undefined
+      return allPages.length
     },
   })
 }
