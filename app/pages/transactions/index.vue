@@ -184,22 +184,26 @@ const periods: { v: PresetPeriod; l: string }[] = [
     </div>
 
     <!-- Resumen por moneda -->
-    <div v-if="Object.keys(totalsByCurrency).length" class="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(280px,1fr))]">
-      <div v-for="(t, currency) in totalsByCurrency" :key="currency" class="app-card !p-4">
-        <div class="flex items-center justify-between">
-          <p class="text-xs uppercase tracking-wider text-text-muted">
+    <div v-if="Object.keys(totalsByCurrency).length" class="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
+      <div v-for="(t, currency) in totalsByCurrency" :key="currency" class="app-card !p-3">
+        <div class="flex items-center justify-between gap-2">
+          <p class="text-xs uppercase tracking-wider text-text-muted truncate">
             {{ t.count }} mov. · {{ currency }}
           </p>
           <span
-            class="font-mono text-sm font-semibold tabular-nums"
+            class="font-mono text-sm font-semibold tabular-nums truncate"
             :class="(t.income - t.expense) >= 0 ? 'text-success' : 'text-danger'"
           >
             {{ Intl.NumberFormat('es-AR', { style: 'currency', currency }).format(t.income - t.expense) }}
           </span>
         </div>
-        <div class="mt-2 flex gap-4 text-xs">
-          <span class="text-success">+ {{ Intl.NumberFormat('es-AR', { style: 'currency', currency }).format(t.income) }}</span>
-          <span class="text-danger">− {{ Intl.NumberFormat('es-AR', { style: 'currency', currency }).format(t.expense) }}</span>
+        <div class="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs">
+          <span class="text-success font-mono tabular-nums truncate">
+            + {{ Intl.NumberFormat('es-AR', { style: 'currency', currency }).format(t.income) }}
+          </span>
+          <span class="text-danger font-mono tabular-nums truncate">
+            − {{ Intl.NumberFormat('es-AR', { style: 'currency', currency }).format(t.expense) }}
+          </span>
         </div>
       </div>
     </div>

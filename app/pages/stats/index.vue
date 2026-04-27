@@ -131,7 +131,7 @@ const maxCategoryTotal = computed(() => Math.max(1, ...topCategories.value.map(c
         <div v-if="monthComparison" class="app-card">
           <p class="text-xs uppercase tracking-wider text-text-muted">Vs mes anterior</p>
           <p
-            class="mt-1 flex items-center gap-1 font-mono text-2xl font-semibold tabular-nums"
+            class="mt-1 flex items-center gap-1 truncate font-mono text-xl sm:text-2xl font-semibold tabular-nums"
             :class="monthComparison.pct > 0 ? 'text-danger' : monthComparison.pct < 0 ? 'text-success' : 'text-text-soft'"
           >
             <ArrowUpRight v-if="monthComparison.pct > 0" :size="18" />
@@ -153,18 +153,20 @@ const maxCategoryTotal = computed(() => Math.max(1, ...topCategories.value.map(c
           <div
             v-for="m in monthsData"
             :key="'e-' + m.key"
-            class="grid grid-cols-[52px_1fr_auto] items-center gap-3 text-xs"
+            class="text-xs"
           >
-            <span class="text-text-muted">{{ m.label }}</span>
-            <div class="h-7 overflow-hidden rounded-lg bg-elevated">
+            <div class="flex items-baseline justify-between gap-2 mb-1">
+              <span class="text-text-muted">{{ m.label }}</span>
+              <span class="font-mono font-semibold tabular-nums truncate">
+                {{ formatCurrency(m.expense, defaultCurrency) }}
+              </span>
+            </div>
+            <div class="h-2 overflow-hidden rounded-full bg-elevated">
               <div
-                class="h-full rounded-lg bg-danger transition-all"
+                class="h-full rounded-full bg-danger transition-all"
                 :style="{ width: (m.expense / maxExpense * 100) + '%' }"
               />
             </div>
-            <span class="font-mono text-xs font-semibold tabular-nums min-w-[100px] text-right">
-              {{ formatCurrency(m.expense, defaultCurrency) }}
-            </span>
           </div>
         </div>
       </section>
@@ -179,18 +181,20 @@ const maxCategoryTotal = computed(() => Math.max(1, ...topCategories.value.map(c
           <div
             v-for="m in monthsData"
             :key="'i-' + m.key"
-            class="grid grid-cols-[52px_1fr_auto] items-center gap-3 text-xs"
+            class="text-xs"
           >
-            <span class="text-text-muted">{{ m.label }}</span>
-            <div class="h-7 overflow-hidden rounded-lg bg-elevated">
+            <div class="flex items-baseline justify-between gap-2 mb-1">
+              <span class="text-text-muted">{{ m.label }}</span>
+              <span class="font-mono font-semibold tabular-nums truncate text-success">
+                {{ formatCurrency(m.income, defaultCurrency) }}
+              </span>
+            </div>
+            <div class="h-2 overflow-hidden rounded-full bg-elevated">
               <div
-                class="h-full rounded-lg bg-success transition-all"
+                class="h-full rounded-full bg-success transition-all"
                 :style="{ width: (m.income / maxIncome * 100) + '%' }"
               />
             </div>
-            <span class="font-mono text-xs font-semibold tabular-nums min-w-[100px] text-right">
-              {{ formatCurrency(m.income, defaultCurrency) }}
-            </span>
           </div>
         </div>
       </section>
@@ -205,30 +209,26 @@ const maxCategoryTotal = computed(() => Math.max(1, ...topCategories.value.map(c
           <div
             v-for="m in monthsData"
             :key="'n-' + m.key"
-            class="grid grid-cols-[52px_1fr_auto] items-center gap-3 text-xs"
+            class="text-xs"
           >
-            <span class="text-text-muted">{{ m.label }}</span>
-            <div class="relative flex h-7 items-center rounded-lg bg-elevated overflow-hidden">
+            <div class="flex items-baseline justify-between gap-2 mb-1">
+              <span class="text-text-muted">{{ m.label }}</span>
+              <span
+                class="font-mono font-semibold tabular-nums truncate"
+                :class="m.net >= 0 ? 'text-success' : 'text-danger'"
+              >
+                {{ m.net >= 0 ? '+' : '' }}{{ formatCurrency(m.net, defaultCurrency) }}
+              </span>
+            </div>
+            <div class="relative flex h-3 items-center rounded-full bg-elevated overflow-hidden">
               <div class="absolute inset-y-0 left-1/2 w-px bg-border" />
               <div class="flex h-full w-1/2 flex-row-reverse">
-                <div
-                  class="h-full bg-danger/60"
-                  :style="{ width: (m.expense / maxExpense * 100) + '%' }"
-                />
+                <div class="h-full bg-danger/60" :style="{ width: (m.expense / maxExpense * 100) + '%' }" />
               </div>
               <div class="h-full w-1/2">
-                <div
-                  class="h-full bg-success/60"
-                  :style="{ width: (m.income / maxIncome * 100) + '%' }"
-                />
+                <div class="h-full bg-success/60" :style="{ width: (m.income / maxIncome * 100) + '%' }" />
               </div>
             </div>
-            <span
-              class="font-mono text-xs font-semibold tabular-nums min-w-[100px] text-right"
-              :class="m.net >= 0 ? 'text-success' : 'text-danger'"
-            >
-              {{ m.net >= 0 ? '+' : '' }}{{ formatCurrency(m.net, defaultCurrency) }}
-            </span>
           </div>
         </div>
       </section>
@@ -257,13 +257,18 @@ const maxCategoryTotal = computed(() => Math.max(1, ...topCategories.value.map(c
           <div
             v-for="c in topCategories"
             :key="c.id ?? 'none'"
-            class="grid grid-cols-[32px_1fr_auto] items-center gap-3"
+            class="flex items-start gap-2.5"
           >
-            <span class="text-lg">{{ c.icon || '○' }}</span>
+            <span class="shrink-0 text-lg leading-none mt-0.5">{{ c.icon || '○' }}</span>
             <div class="flex-1 min-w-0">
               <div class="flex items-baseline justify-between gap-2">
-                <p class="truncate text-sm">{{ c.name || 'Sin categoría' }}</p>
-                <span class="text-xs text-text-muted">{{ c.count }}×</span>
+                <p class="truncate text-sm">
+                  {{ c.name || 'Sin categoría' }}
+                  <span class="text-xs text-text-muted ml-1">{{ c.count }}×</span>
+                </p>
+                <span class="font-mono text-sm font-semibold tabular-nums truncate">
+                  {{ formatCurrency(c.total, defaultCurrency) }}
+                </span>
               </div>
               <div class="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-elevated">
                 <div
@@ -275,9 +280,6 @@ const maxCategoryTotal = computed(() => Math.max(1, ...topCategories.value.map(c
                 />
               </div>
             </div>
-            <span class="font-mono text-sm font-semibold tabular-nums min-w-[110px] text-right">
-              {{ formatCurrency(c.total, defaultCurrency) }}
-            </span>
           </div>
         </div>
       </section>

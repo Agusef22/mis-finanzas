@@ -82,7 +82,7 @@ const displayPct = computed(() => {
 
 <template>
   <div class="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
-    <div class="relative" :style="{ width: size + 'px', height: size + 'px' }">
+    <div class="relative shrink-0" :style="{ width: size + 'px', height: size + 'px', maxWidth: '100%' }">
       <svg
         :width="size"
         :height="size"

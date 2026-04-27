@@ -41,15 +41,17 @@ function onEdit(tx: Transaction) {
     <div
       v-for="tx in transactions"
       :key="tx.id"
-      class="group flex items-center gap-2.5 px-3 py-2 transition hover:bg-elevated"
+      class="group flex items-center gap-2.5 px-3 py-2.5 transition hover:bg-elevated"
     >
-      <!-- Icon -->
-      <div
-        class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm"
+      <!-- Icon (tappable hace edit en mobile) -->
+      <button
+        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm md:cursor-default"
         :style="{
           backgroundColor: ((tx as any).category?.color ?? '#b4a088') + '22',
           color: (tx as any).category?.color ?? undefined,
         }"
+        :aria-label="'Editar ' + (tx.description || 'movimiento')"
+        @click="onEdit(tx)"
       >
         <template v-if="(tx as any).category?.icon">
           {{ (tx as any).category.icon }}
@@ -59,10 +61,13 @@ function onEdit(tx: Transaction) {
           <ArrowLeftRight v-else-if="tx.type === 'transfer'" :size="14" />
           <ArrowDownLeft v-else :size="14" />
         </template>
-      </div>
+      </button>
 
-      <!-- Info -->
-      <div class="min-w-0 flex-1">
+      <!-- Info (tappable también) -->
+      <button
+        class="min-w-0 flex-1 text-left"
+        @click="onEdit(tx)"
+      >
         <div class="flex items-center gap-1.5">
           <p class="truncate text-sm font-medium leading-tight">
             {{ tx.description || (tx as any).category?.name || (tx.type === 'income' ? 'Ingreso' : tx.type === 'transfer' ? 'Transferencia' : 'Gasto') }}
@@ -71,17 +76,17 @@ function onEdit(tx: Transaction) {
             {{ tx.source }}
           </span>
         </div>
-        <p class="truncate text-[11px] text-text-muted leading-tight">
+        <p class="mt-0.5 truncate text-[11px] text-text-muted leading-tight">
           <span v-if="(tx as any).account">{{ (tx as any).account.name }}</span>
           <span v-if="(tx as any).category"> · {{ (tx as any).category.name }}</span>
           · {{ formatRelative(tx.occurred_at) }}
         </p>
-      </div>
+      </button>
 
       <!-- Amount + actions -->
       <div class="flex shrink-0 items-center gap-0.5">
         <p
-          class="font-mono text-sm font-semibold tabular-nums"
+          class="font-mono text-sm font-semibold tabular-nums whitespace-nowrap"
           :class="{
             'text-success': tx.type === 'income',
             'text-danger': tx.type === 'expense',
@@ -91,21 +96,14 @@ function onEdit(tx: Transaction) {
           {{ tx.type === 'expense' ? '−' : tx.type === 'income' ? '+' : '' }}
           {{ formatCurrency(Number(tx.amount), tx.currency) }}
         </p>
+        <!-- Mobile: botón borrar visible siempre. Desktop: aparece al hover -->
         <button
-          class="ml-1 rounded p-1 opacity-0 transition group-hover:opacity-100 text-text-muted hover:bg-border-soft hover:text-accent"
-          :aria-label="'Editar ' + (tx.description || '')"
-          title="Editar"
-          @click="onEdit(tx)"
-        >
-          <Pencil :size="13" />
-        </button>
-        <button
-          class="rounded p-1 opacity-0 transition group-hover:opacity-100 text-text-muted hover:bg-border-soft hover:text-danger"
+          class="ml-1 rounded p-1.5 text-text-muted opacity-100 transition hover:bg-border-soft hover:text-danger md:opacity-0 md:group-hover:opacity-100"
           :aria-label="'Borrar ' + (tx.description || '')"
           title="Borrar"
-          @click="onDelete(tx.id, tx.description)"
+          @click.stop="onDelete(tx.id, tx.description)"
         >
-          <Trash2 :size="13" />
+          <Trash2 :size="14" />
         </button>
       </div>
     </div>

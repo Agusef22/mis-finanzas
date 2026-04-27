@@ -176,7 +176,7 @@ async function confirmDelete() {
             <div class="min-w-0 flex-1">
               <p class="truncate text-base font-medium">{{ b.name }}</p>
               <p class="text-xs text-text-muted capitalize">{{ b.type.replace('_', ' ') }} · {{ b.currency }}</p>
-              <p class="mt-3 font-mono text-2xl font-semibold tabular-nums">
+              <p class="mt-3 truncate font-mono text-xl sm:text-2xl font-semibold tabular-nums">
                 {{ formatCurrency(Number(b.balance), b.currency) }}
               </p>
             </div>

@@ -40,11 +40,12 @@ watch(() => props.open, (v) => {
     >
       <div
         v-if="open"
-        class="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm sm:items-center"
+        class="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm sm:items-center sm:p-4"
         @click.self="onBackdrop"
       >
         <div
-          class="w-full max-w-md rounded-t-xl bg-surface p-6 shadow-2xl sm:rounded-xl border border-border animate-fade-in"
+          class="w-full max-h-[90dvh] overflow-y-auto rounded-t-xl bg-surface p-5 shadow-2xl border border-border animate-fade-in sm:max-w-md sm:rounded-xl sm:p-6"
+          style="padding-bottom: max(1.25rem, env(safe-area-inset-bottom));"
           @click.stop
         >
           <div v-if="title || closable !== false" class="mb-4 flex items-start justify-between gap-3">

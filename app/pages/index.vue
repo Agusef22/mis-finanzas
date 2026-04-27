@@ -136,25 +136,25 @@ const greeting = computed(() => {
       v-if="hasMultipleOrDifferentCurrencies"
       class="app-card-accent"
     >
-      <div class="flex items-start justify-between gap-4">
+      <div class="flex items-start justify-between gap-3">
         <div class="min-w-0 flex-1">
-          <p class="text-xs uppercase tracking-widest text-white/70">Total en {{ consolidated.target }}</p>
-          <p class="mt-2 font-mono text-4xl font-semibold leading-none tracking-tight tabular-nums">
+          <p class="text-[11px] uppercase tracking-widest text-white/70">Total en {{ consolidated.target }}</p>
+          <p class="mt-1.5 font-mono text-2xl sm:text-3xl md:text-4xl font-semibold leading-none tracking-tight tabular-nums truncate">
             <template v-if="loadingRates">…</template>
             <template v-else-if="ratesError">
-              <span class="text-base">Cotización no disponible</span>
+              <span class="text-sm">Cotización no disponible</span>
             </template>
             <template v-else>
               {{ formatCurrency(consolidated.total, consolidated.target) }}
             </template>
           </p>
-          <p v-if="rateInfo" class="mt-3 text-xs text-white/70">
+          <p v-if="rateInfo" class="mt-2 text-[11px] text-white/70 truncate">
             1 USD {{ activeRateType }} = {{ formatCurrency(rateInfo.value, 'ARS') }}
           </p>
         </div>
         <select
           :value="activeRateType"
-          class="rounded-lg bg-white/15 px-3 py-1.5 text-sm text-white backdrop-blur hover:bg-white/25 focus:outline-none"
+          class="shrink-0 rounded-lg bg-white/15 px-2 py-1.5 text-xs text-white backdrop-blur hover:bg-white/25 focus:outline-none"
           @change="persistRateType(($event.target as HTMLSelectElement).value as RateType)"
         >
           <option class="text-text" value="blue">Blue</option>
@@ -164,9 +164,9 @@ const greeting = computed(() => {
           <option class="text-text" value="tarjeta">Tarjeta</option>
         </select>
       </div>
-      <p v-if="Object.keys(consolidated.unconverted).length" class="mt-3 text-xs text-white/80">
+      <p v-if="Object.keys(consolidated.unconverted).length" class="mt-3 text-[11px] text-white/80 break-words">
         No convertido:
-        <span v-for="(amt, cur) in consolidated.unconverted" :key="cur" class="font-mono">
+        <span v-for="(amt, cur) in consolidated.unconverted" :key="cur" class="font-mono ml-1">
           {{ formatCurrency(amt, cur) }}
         </span>
       </p>
@@ -176,9 +176,9 @@ const greeting = computed(() => {
     <section>
       <h2 class="mb-2 text-xs font-medium uppercase tracking-wider text-text-muted">Saldos</h2>
       <div class="grid-cards-sm">
-        <div v-for="(total, currency) in balancesByCurrency" :key="currency" class="app-card !p-3">
+        <div v-for="(total, currency) in balancesByCurrency" :key="currency" class="app-card !p-3 overflow-hidden">
           <p class="text-[11px] uppercase tracking-wider text-text-muted">{{ currency }}</p>
-          <p class="mt-0.5 font-mono text-lg font-semibold tabular-nums">
+          <p class="mt-0.5 truncate font-mono text-base sm:text-lg font-semibold tabular-nums">
             {{ formatCurrency(total, currency) }}
           </p>
         </div>
@@ -191,21 +191,21 @@ const greeting = computed(() => {
         Este mes · {{ defaultCurrency }}
       </h2>
       <div class="grid grid-cols-2 gap-2">
-        <div class="app-card !p-3">
+        <div class="app-card !p-3 overflow-hidden">
           <div class="flex items-center justify-between">
             <p class="text-[11px] uppercase tracking-wider text-text-muted">Ingresos</p>
             <TrendingUp :size="14" class="text-success" />
           </div>
-          <p class="mt-0.5 font-mono text-lg font-semibold tabular-nums text-success">
+          <p class="mt-0.5 truncate font-mono text-base sm:text-lg font-semibold tabular-nums text-success">
             {{ formatCurrency(monthTotals.income, defaultCurrency) }}
           </p>
         </div>
-        <div class="app-card !p-3">
+        <div class="app-card !p-3 overflow-hidden">
           <div class="flex items-center justify-between">
             <p class="text-[11px] uppercase tracking-wider text-text-muted">Gastos</p>
             <TrendingDown :size="14" class="text-danger" />
           </div>
-          <p class="mt-0.5 font-mono text-lg font-semibold tabular-nums text-danger">
+          <p class="mt-0.5 truncate font-mono text-base sm:text-lg font-semibold tabular-nums text-danger">
             {{ formatCurrency(monthTotals.expense, defaultCurrency) }}
           </p>
         </div>
@@ -234,7 +234,7 @@ const greeting = computed(() => {
             <p class="truncate text-sm leading-tight">{{ c.name || 'Sin categoría' }}</p>
             <p class="text-[11px] text-text-muted leading-tight">{{ c.count }} mov.</p>
           </div>
-          <p class="font-mono text-sm font-semibold tabular-nums">
+          <p class="shrink-0 font-mono text-sm font-semibold tabular-nums truncate max-w-[40%]">
             {{ formatCurrency(c.total, defaultCurrency) }}
           </p>
         </div>

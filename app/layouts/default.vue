@@ -9,31 +9,36 @@ import {
   Tag,
   Target,
   Trophy,
+  Menu,
+  X as XIcon,
 } from 'lucide-vue-next'
 
 const user = useSupabaseUser()
 const client = useSupabaseClient()
+const route = useRoute()
 
 async function logout() {
   await client.auth.signOut()
   await navigateTo('/login')
 }
 
-// Links principales del nav — los 5 que van al bottom en mobile
-const primaryNav = [
+const navLinks = [
   { to: '/', label: 'Inicio', icon: LayoutGrid },
   { to: '/transactions', label: 'Movimientos', icon: ArrowLeftRight },
-  { to: '/stats', label: 'Stats', icon: BarChart3 },
+  { to: '/stats', label: 'Estadísticas', icon: BarChart3 },
   { to: '/accounts', label: 'Cuentas', icon: Wallet },
-  { to: '/settings', label: 'Ajustes', icon: Settings },
-]
-
-// Links secundarios — solo sidebar desktop
-const secondaryNav = [
   { to: '/budgets', label: 'Presupuestos', icon: Target },
   { to: '/goals', label: 'Metas', icon: Trophy },
   { to: '/categories', label: 'Categorías', icon: Tag },
+  { to: '/settings', label: 'Ajustes', icon: Settings },
 ]
+
+const drawerOpen = ref(false)
+
+// Cerrar drawer al navegar
+watch(() => route.path, () => {
+  drawerOpen.value = false
+})
 </script>
 
 <template>
@@ -48,18 +53,7 @@ const secondaryNav = [
 
       <nav class="flex flex-1 flex-col gap-0.5">
         <NuxtLink
-          v-for="link in primaryNav"
-          :key="link.to"
-          :to="link.to"
-          class="nav-link"
-          active-class="router-link-active"
-        >
-          <component :is="link.icon" :size="16" />
-          {{ link.label }}
-        </NuxtLink>
-        <div class="my-2 border-t border-border" />
-        <NuxtLink
-          v-for="link in secondaryNav"
+          v-for="link in navLinks"
           :key="link.to"
           :to="link.to"
           class="nav-link"
@@ -82,60 +76,71 @@ const secondaryNav = [
     <!-- ================= Mobile header ================= -->
     <header
       class="sticky top-0 z-20 border-b border-border bg-bg/80 backdrop-blur md:hidden"
+      style="padding-top: env(safe-area-inset-top);"
     >
       <div class="flex items-center justify-between px-3 py-2">
-        <NuxtLink to="/">
+        <button
+          class="-ml-1 flex h-11 w-11 items-center justify-center rounded-lg text-text hover:bg-elevated"
+          aria-label="Abrir menú"
+          @click="drawerOpen = true"
+        >
+          <Menu :size="22" />
+        </button>
+        <NuxtLink to="/" class="flex items-center">
           <AppLogo :size="24" />
         </NuxtLink>
-        <div class="flex items-center gap-0.5">
-          <NuxtLink to="/categories" class="app-btn app-btn-ghost !p-1.5" title="Categorías">
-            <Tag :size="16" />
-          </NuxtLink>
-          <ThemeToggle />
-          <button class="app-btn app-btn-ghost !p-1.5" title="Salir" @click="logout">
-            <LogOut :size="16" />
-          </button>
-        </div>
+        <ThemeToggle />
       </div>
     </header>
 
+    <!-- ================= Drawer mobile ================= -->
+    <AppDrawer :open="drawerOpen" @close="drawerOpen = false">
+      <div class="flex items-center justify-between border-b border-border px-4 py-3">
+        <AppLogo :size="26" />
+        <button
+          class="flex h-10 w-10 items-center justify-center rounded-lg text-text-soft hover:bg-elevated"
+          aria-label="Cerrar menú"
+          @click="drawerOpen = false"
+        >
+          <XIcon :size="20" />
+        </button>
+      </div>
+
+      <nav class="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3 py-3">
+        <NuxtLink
+          v-for="link in navLinks"
+          :key="link.to"
+          :to="link.to"
+          class="nav-link !text-base !py-3"
+          active-class="router-link-active"
+        >
+          <component :is="link.icon" :size="20" />
+          {{ link.label }}
+        </NuxtLink>
+      </nav>
+
+      <div class="border-t border-border px-3 py-3">
+        <button
+          class="app-btn app-btn-ghost w-full justify-start !text-base !py-3"
+          @click="logout"
+        >
+          <LogOut :size="20" />
+          Salir
+        </button>
+      </div>
+    </AppDrawer>
+
     <!-- ================= Main content ================= -->
-    <main class="min-h-screen pb-20 md:pb-4 md:pl-52">
-      <div class="mx-auto max-w-4xl px-3 py-3 md:py-5 md:px-6">
+    <main class="min-h-screen pb-6 md:pl-52">
+      <div class="mx-auto w-full max-w-4xl px-3 py-4 md:py-6 md:px-6">
         <slot />
       </div>
     </main>
 
-    <!-- ================= Mobile bottom nav ================= -->
-    <nav
-      v-if="user"
-      class="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-surface/90 backdrop-blur-lg md:hidden"
-      style="padding-bottom: env(safe-area-inset-bottom);"
-    >
-      <div class="flex items-stretch">
-        <NuxtLink
-          v-for="link in primaryNav"
-          :key="link.to"
-          :to="link.to"
-          class="bottom-nav-link"
-          active-class="router-link-active"
-        >
-          <component :is="link.icon" :size="20" />
-          <span>{{ link.label }}</span>
-        </NuxtLink>
-      </div>
-    </nav>
-
-    <!-- Banner de estado de red (aparece solo cuando estás offline o recién volviste online) -->
+    <!-- Dialogs / toasts globales -->
     <NetworkStatusBar />
-
-    <!-- Dialog global de confirmación — usar con useConfirm() -->
     <ConfirmDialog />
-
-    <!-- Dialog global para editar transacciones — usar con useEditTransaction() -->
     <TransactionEditDialog />
-
-    <!-- Toasts globales — usar con useToast() -->
     <ToastContainer />
   </div>
 </template>
