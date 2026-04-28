@@ -12,7 +12,45 @@ export default defineNuxtConfig({
     '@vueuse/nuxt',
     '@pinia/nuxt',
     '@nuxt/fonts',
+    '@vite-pwa/nuxt',
   ],
+
+  // PWA: la app se instala en home como "app nativa" (mobile + desktop).
+  // Cache conservador: solo assets estáticos. Las rutas y datos de Supabase
+  // pasan siempre por la red para no exponer data stale en una app financiera.
+  pwa: {
+    registerType: 'autoUpdate',
+    manifest: {
+      name: 'mis-finanzas',
+      short_name: 'mis-finanzas',
+      description: 'Gestión personal de finanzas',
+      lang: 'es-AR',
+      theme_color: '#1a1a1a',
+      background_color: '#f5f5f0',
+      display: 'standalone',
+      orientation: 'portrait',
+      start_url: '/',
+      scope: '/',
+      icons: [
+        { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+        { src: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+        { src: '/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+      ],
+    },
+    workbox: {
+      // Solo cachear assets del shell (JS/CSS/fuentes/imágenes).
+      // NO cacheamos rutas ni Supabase porque manejamos plata.
+      globPatterns: ['**/*.{js,css,html,png,svg,woff2,ico}'],
+      navigateFallback: null,
+      cleanupOutdatedCaches: true,
+    },
+    client: {
+      installPrompt: false,
+    },
+    devOptions: {
+      enabled: false,
+    },
+  },
 
   fonts: {
     families: [
@@ -66,6 +104,7 @@ export default defineNuxtConfig({
       ],
       link: [
         { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+        { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
       ],
       // Script inline: aplica dark class ANTES del primer render para evitar flash de tema.
       script: [

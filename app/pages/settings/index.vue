@@ -173,22 +173,24 @@ async function saveProfile() {
           <span class="text-sm text-accent">Vincular →</span>
         </button>
 
-        <button
-          type="button"
-          class="flex items-center justify-between rounded-xl border border-border bg-elevated/60 p-4 text-left transition hover:border-accent/30 hover:bg-elevated"
-          @click="generate('whatsapp')"
+        <div
+          class="flex items-center justify-between rounded-xl border border-border bg-elevated/30 p-4 text-left opacity-70"
+          aria-disabled="true"
+          :title="'Próximamente'"
         >
           <div class="flex items-center gap-3">
-            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-[#25D366]/15 text-[#25D366]">
+            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-[#25D366]/10 text-[#25D366]/70">
               <MessageSquare :size="20" />
             </div>
             <div>
-              <p class="font-medium">WhatsApp</p>
-              <p class="text-xs text-text-muted">Escribí al sandbox de Twilio</p>
+              <p class="font-medium text-text-soft">WhatsApp</p>
+              <p class="text-xs text-text-muted">Próximamente</p>
             </div>
           </div>
-          <span class="text-sm text-accent">Vincular →</span>
-        </button>
+          <span class="rounded-full border border-border bg-surface px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-text-muted">
+            Coming soon
+          </span>
+        </div>
       </div>
 
       <!-- Código activo -->

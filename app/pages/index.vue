@@ -110,11 +110,12 @@ const topCategories = computed(() => {
   return [...map.values()].sort((a, b) => b.total - a.total).slice(0, 5)
 })
 
-const greeting = computed(() => {
+// Calculado solo en cliente para evitar hydration mismatch
+// (el server está en UTC y el cliente en hora local).
+const greeting = ref('Hola')
+onMounted(() => {
   const h = new Date().getHours()
-  if (h < 12) return 'Buen día'
-  if (h < 19) return 'Buenas tardes'
-  return 'Buenas noches'
+  greeting.value = h < 12 ? 'Buen día' : h < 19 ? 'Buenas tardes' : 'Buenas noches'
 })
 </script>
 
