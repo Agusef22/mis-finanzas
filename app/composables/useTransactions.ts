@@ -166,9 +166,23 @@ export function useCreateTransaction() {
         updated_at: new Date().toISOString(),
       }
 
-      qc.setQueriesData<Transaction[]>({ queryKey: ['transactions'] }, (old) => {
+      // setQueriesData matchea por prefijo, así que pega tanto en useTransactions
+      // (data: Transaction[]) como en useInfiniteTransactions (data: { pages, pageParams }).
+      // Hay que detectar el shape para no spreadear un objeto como si fuera array.
+      qc.setQueriesData({ queryKey: ['transactions'] }, (old: any) => {
         if (!old) return [optimistic]
-        return [optimistic, ...old]
+        // Infinite query: prepend al primer page
+        if (Array.isArray(old.pages)) {
+          return {
+            ...old,
+            pages: old.pages.map((page: any[], i: number) =>
+              i === 0 ? [optimistic, ...page] : page,
+            ),
+          }
+        }
+        // Flat array
+        if (Array.isArray(old)) return [optimistic, ...old]
+        return old
       })
 
       return { previous }
